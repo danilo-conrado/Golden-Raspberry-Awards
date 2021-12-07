@@ -3,10 +3,11 @@
 
 
 Primeiramente para a execução da aplicação, temos algumas observações quanto ao banco de dados.
+- A aplicação irá realizar uma busca do arquivo no diretório do usuário, caso não encontre, irá solicitar para que o mesmo seja indicado manualmente.
 
 - O arquivo utilizado como base de dados, deve ser colocado em:
  ```sh
- "C:\gra"
+ "%USERPROFILE%\gra" OU "$HOME\gra"
  ```
 - O nome do arquivo deve ser:
 ```sh
@@ -42,7 +43,25 @@ http://localhost:8080/h2-console
 ```sh
 AwardsTest.class
 ```
+- São eles:
+```sh
+@Test
+    testRequestEndpoint()
+```
+-Verifica se o ENDPOINT esta com online(status 200).
+
+```sh
+@Test
+    testDb()
+```
+-Realiza testes do banco de dados, como integradade tanto salvando um novo candidato como fazendo as requisições diretamente nele.
+
+```sh
+@Test
+    testGetAward()
+```
+-Verifica o conteúdo do retorno do ENDPOINT, se a resposta esta conforme a especificação.
 
 ## Observações
-- O retorno esta com um produtor com maior intervalo e outro com menor, assim como solicitado na especificação.
-- Foram separado todos os Produtores, considerando a premição para cada um de forma individual, por exemplo, caso o primeiro prêmio foi ganho em conjunto com outros produtores, ele considera como premio individual para este produtor, caso futuramente ele conquiste mais uma premiação, mesmo sendo o unico produtor do filme, é considerado também.
+- O retorno esta com um produtor com maior intervalo e outro com menor,caso exista alguma forma de empate, retornará todos os produtores empatados, assim como solicitado na especificação.
+- Foram separados todos os Produtores, considerando a premiação para cada um de forma individual, por exemplo, caso o primeiro prêmio foi ganho em conjunto com outros produtores, ele considera como premio individual para este produtor, caso futuramente ele conquiste mais uma premiação, mesmo sendo o unico produtor do filme, é considerado também.

@@ -2,7 +2,7 @@ package br.com.gra.query.goldenraspberryawards.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class Producer {
+public class Producer implements Cloneable {
 	@JsonIgnore
 	Long id;
 	String producer;
@@ -12,7 +12,8 @@ public class Producer {
 	
 	
 	public Producer() {
-	}	
+	}
+
 	public Producer(Long id, String producer) {
 		this.id = id;
 		this.producer = producer;
@@ -52,7 +53,14 @@ public class Producer {
 	public Integer getIntervalByYear() {
 		return (this.getFollowingWin() - this.getPreviousWin());
 	}
-
+	@JsonIgnore
+	public void setIntervalByGetintervalByYear() {
+		this.interval = (this.getFollowingWin() - this.getPreviousWin());
+	}
+    @Override
+    public Producer clone() throws CloneNotSupportedException {
+        return (Producer) super.clone();
+    }
 
 	
 	

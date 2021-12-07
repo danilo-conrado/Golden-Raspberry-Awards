@@ -29,15 +29,19 @@ public class MoviesController {
 	List<Movies> listMovies = new ArrayList<Movies>();
 	List<Producer> listProducersIndividual = new ArrayList<Producer>();
 	Producer producerCheck = new Producer();
-	Integer menor = 100000;
-	Integer maior = 0;
+	Integer smaller = 100000;
+	Integer bigger = 0;
+	boolean addMin = false;
+	boolean addMax = false;
+	boolean hasPrevious = false;
+	boolean hasFollowin = false;
 	@Autowired
 	private MoviesRepository moviesRepository;
 	@ApiOperation(value = "Retorna os produtores com maior e menor intervalo na premiação do Golden Raspberry Awards!")
 	@ApiResponse(code = 200, message = "Retorna o resultado.")
 	
 	@GetMapping(value="/MajorAndMinor", produces="application/json")
-	public ResponseEntity<Award> findMajorAndMinor() {
+	public ResponseEntity<Award> findMajorAndMinor() throws CloneNotSupportedException {
 		listProducersIndividual = new ArrayList<Producer>();
 		listMovies = new ArrayList<Movies>();
 		listProducer = new ArrayList<Producer>();
@@ -53,7 +57,7 @@ public class MoviesController {
 							exist = true;
 						}
 					}
-					if (exist == false) {
+					if (!exist) {
 						listProducer.add(new Producer(movie.getId(), utils.firstToUpercase(producerString)));
 					}
 
@@ -64,25 +68,43 @@ public class MoviesController {
 
 		for (Producer producer : listProducer) {
 			producerCheck = new Producer();
-			producerCheck = producer;
-			menor = 100000;
-			maior = 0;
+			producerCheck = producer.clone();
+			smaller = 100000;
+			bigger = 0;
+
+			
 			for (Movies movie : listMovies) {
+				
 				if (movie.getProducer().contains(producer.getProducer())) {
-					if (movie.getYear() < menor) {
-						menor = movie.getYear();
-						producerCheck.setPreviousWin(menor);
+					if (movie.getYear() < smaller) {
+						hasPrevious = true;
+						smaller = movie.getYear();
+						producerCheck.setPreviousWin(smaller);
 					}
-					if (movie.getYear() > maior) {
-						maior = movie.getYear();
-						producerCheck.setFollowingWin(maior);
+					if (movie.getYear() > bigger) {
+						bigger = movie.getYear();
+						producerCheck.setFollowingWin(bigger);
+						if(producerCheck.getFollowingWin() != producerCheck.getPreviousWin()) {
+							hasFollowin = true;
+						}
 					}
 				}
+				if(hasPrevious && hasFollowin) {
+
+					listProducersIndividual.add(producerCheck);
+					producerCheck = new Producer();
+					producerCheck = producer.clone();
+					producerCheck.setPreviousWin(bigger);
+					smaller = bigger;
+					bigger = 0;
+					hasFollowin = false;
+					
+				}
 			}
-			if (producerCheck.getPreviousWin() != producerCheck.getFollowingWin()) {
-				listProducersIndividual.add(producerCheck);
-			}
+
+			
 		}
+
 		Producer min = new Producer();
 		Producer max = new Producer();
 		min.setInterval(1000);
@@ -97,8 +119,42 @@ public class MoviesController {
 				max.setInterval(producerMinMax.getIntervalByYear());
 			}
 		}
-
 		Award award = new Award(min, max);
+		
+		for (Producer producer : listProducersIndividual) {
+			producerCheck = new Producer();
+			producerCheck = producer;
+			addMin = false;
+			addMax = false;
+			if (min.getInterval() == producer.getIntervalByYear()) {
+				for(Producer checkProducerContainMin : award.getMin()) {
+					if(!checkProducerContainMin.getProducer().equals(producer.getProducer())
+							|| checkProducerContainMin.getProducer().equals(producer.getProducer())
+							&& checkProducerContainMin.getPreviousWin() != producer.getPreviousWin()) {
+						producer.setIntervalByGetintervalByYear();
+						addMin = true;
+					}
+					
+				}
+			}
+			if (max.getInterval() == producer.getIntervalByYear()) {
+				for(Producer checkProducerContainMin : award.getMax()) {
+					if(!checkProducerContainMin.getProducer().equals(producer.getProducer())
+							|| checkProducerContainMin.getProducer().equals(producer.getProducer()) 
+							&&checkProducerContainMin.getPreviousWin() != producer.getPreviousWin()) {
+						producer.setIntervalByGetintervalByYear();
+						addMax = true;
+					}
+					
+				}
+			}
+			if(addMin) {
+				award.getMin().add(producer);
+			}else if(addMax) {
+				award.getMax().add(producer);
+			}
+			
+		}
 
 		return ResponseEntity.ok(award);
 	}

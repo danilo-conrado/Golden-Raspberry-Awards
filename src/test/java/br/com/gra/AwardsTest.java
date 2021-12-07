@@ -38,7 +38,6 @@ public class AwardsTest {
     @Mock
     private ObjectMapper objectMapperMock;
     
-    AwardValidator awardValidator;
     @Mock
     MoviesRepository repository;
     
